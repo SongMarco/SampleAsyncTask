@@ -1,6 +1,7 @@
 package com.example.administrator.sampleasynctask;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,9 +11,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends Activity implements View.OnClickListener {
+    private static final Long RESULT_SUCCESS = Long.parseLong("0");
+    private static final Long RESULT_FAIL = Long.parseLong("1");
     EditText edtNumber;
     Button btn1;
     TextView tvResult;
+    long time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +61,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         @Override
         protected void onPostExecute(Long result) {
             super.onPostExecute(result);
-            tvResult.setText(edtNumber.getText().toString() + "! = " + result);
+
+
+
         }
 
         protected void onPreExecute() {
@@ -67,19 +73,41 @@ public class MainActivity extends Activity implements View.OnClickListener {
         @Override
         protected void onProgressUpdate(Long... values) {
             super.onProgressUpdate(values);
+
+            if(time==0){
+                tvResult.setText("go!!!");
+            }
+            else{
+                tvResult.setText(""+time);
+            }
         }
 
         @Override
         protected Long doInBackground(Long... params) {
-            long result = 1;
-            long num = params[0];
+            time = params[0];
 
-            for (long i = 1; i <= num; i++) {
-                result = result * i;
+            MediaPlayer.create(getApplicationContext(), R.raw.go).start();
+
+            while(time > 0) {
+                try {
+                    Thread.sleep(900);         // one second sleep
+                    time--;                     // decrement time
+                    publishProgress();          // trigger onProgressUpdate()
+                } catch(InterruptedException e) {
+                    Log.i("GUN", Log.getStackTraceString(e));
+                    return RESULT_FAIL;
+                }
             }
+            return RESULT_SUCCESS;
 
-            Log.d("test", "result:" + result);
-            return result;
+//
+////
+////            for (long i = 1; i <= num; i++) {
+////                result = result * i;
+////            }
+//
+//            Log.d("test", "result:" + result);
+
         }
     }
 
